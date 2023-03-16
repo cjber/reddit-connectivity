@@ -1,0 +1,138 @@
+schema: '2.0'
+stages:
+  gazetteer:
+    cmd: python -m scripts.preprocessing.gazetteer
+    deps:
+    - path: /home/cjber/data/gbpn-2021_14_06.csv
+      md5: 2f5676cb0e637020f5112d310725960c
+      size: 36417462
+    - path: /home/cjber/data/lad-2023_02_21.parquet
+      md5: a0acc4486f91556333d6bd970c4da65a
+      size: 908970
+    - path: /home/cjber/data/os_opname-2023_02_21
+      md5: c6673265a1f9dfd5da0ccb7d9c7f4cdc.dir
+      size: 1777205703
+      nfiles: 820
+    - path: scripts/preprocessing/gazetteer.py
+      md5: bba4f0cc173460734dbb4efa29e18a7e
+      size: 4907
+    outs:
+    - path: data/processed/gazetteer.parquet
+      md5: 4c14a5f585c3105258438a6244c417a0
+      size: 49278752
+  combine_comments:
+    cmd: python -m scripts.preprocessing.combine_comments
+    deps:
+    - path: /home/cjber/data/comments-2022_04_17
+      md5: 7329374e4f627ee07d44a264f12833f4.dir
+      size: 2650450823
+      nfiles: 258
+    - path: scripts/preprocessing/combine_comments.py
+      md5: d6fec10dea98951324a4b902b76bd16e
+      size: 522
+    outs:
+    - path: data/processed/comments.parquet
+      md5: 4e731b47e72595cc17198777dae84c67
+      size: 678861554
+  ner:
+    cmd: python -m src.ner
+    deps:
+    - path: data/processed/comments.parquet
+      md5: 025675b0c2b3208fcbe052b595272d30
+      size: 653275852
+    - path: src/ner.py
+      md5: 9a986317eec5646ab137858287b99477
+      size: 2915
+    outs:
+    - path: data/processed/ner.csv
+      md5: d41d8cd98f00b204e9800998ecf8427e
+      size: 0
+  analysis:
+    cmd: python -m scripts.analysis.process
+    deps:
+    - path: data/processed/geocoded.csv
+      md5: c31608bd04299419f49859cdeebcd1d5
+      size: 3020093130
+    outs:
+    - path: data/out/h3_pci.parquet
+      md5: c62792022b64adc9858a527722704ca2
+      size: 30756244
+    - path: data/out/places.parquet
+      md5: bcb63ac9ff9597b327430e2b0188333e
+      size: 363137511
+    - path: data/out/places_full.parquet
+      md5: f495c36d310ffb50914c43fce98160b8
+      size: 393266925
+  regressions:
+    cmd: python -m scripts.analysis.regressions
+    deps:
+    - path: data/out/h3_pci.parquet
+      md5: 2471de5adf8fe17eb5681279f76529e3
+      size: 18232388
+    outs:
+    - path: data/out/regressions/h3_lr.parquet
+      md5: 45e2f91fefdf7e35e91787fb4d9df2b8
+      size: 38143532
+    - path: data/out/regressions/h3_lr_metrics.json
+      md5: cf7fa3894d264fbc104b0242831d5ab7
+      size: 114
+    - path: data/out/regressions/mm.parquet
+      md5: 05f0eea2c36270c575638cd8b3069e0f
+      size: 38290760
+    - path: data/out/regressions/mm_metrics.json
+      md5: c6006510bbecaa1c6ebd1bff869eb0e5
+      size: 59
+    - path: data/out/regressions/mm_random_effects.parquet
+      md5: f73e93cc416125d6352c0c0e00ce2460
+      size: 46768
+  h3_poly:
+    cmd: python -m scripts.preprocessing.h3_poly
+    deps:
+    - path: data/out/places.parquet
+      md5: bcb63ac9ff9597b327430e2b0188333e
+      size: 363137511
+    - path: scripts/preprocessing/h3_poly.py
+      md5: b2a61e826e1f320d67e2b573525a8c84
+      size: 342
+    outs:
+    - path: data/out/h3_poly.parquet
+      md5: d62ef0dd6973690dfbe33b80f1412e38
+      size: 119328
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/processed/labelled.jsonl
+      md5: 428b1152757d95f732db8e9e7066b90a
+      size: 171102
+    - path: src/train.py
+      md5: 411dc6af669aabcd8a4bfcf845b7b9c8
+      size: 3498
+    outs:
+    - path: logs/seed_42_ger_test.csv
+      md5: 6634c04a2d38cc1cc91f3358282ff221
+      size: 124
+  geocode:
+    cmd: python -m src.geocode
+    deps:
+    - path: data/processed/gazetteer.parquet
+      md5: 0755edd31f34de9237c2344a30267f5b
+      size: 46809800
+    - path: data/processed/ner.csv
+      md5: cf79b5dc21b49ff4c47e6566d7ca63e5
+      size: 2775594789
+    - path: data/raw/subreddits.parquet
+      md5: 8c4753f52d236918b849c11d78175795
+      size: 15896
+    outs:
+    - path: data/processed/geocoded.csv
+      md5: c31608bd04299419f49859cdeebcd1d5
+      size: 3020093130
+  upload:
+    cmd: python -m src.train --upload=true
+    deps:
+    - path: data/processed/labelled.jsonl
+      md5: 428b1152757d95f732db8e9e7066b90a
+      size: 171102
+    - path: src/train.py
+      md5: 411dc6af669aabcd8a4bfcf845b7b9c8
+      size: 3498

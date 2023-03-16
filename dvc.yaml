@@ -1,0 +1,76 @@
+stages:
+  gazetteer:
+    cmd: python -m scripts.preprocessing.gazetteer
+    deps:
+    - scripts/preprocessing/gazetteer.py
+    - ${DATA_DIR}/lad-2023_02_21.parquet
+    - ${DATA_DIR}/gbpn-2021_14_06.csv
+    - ${DATA_DIR}/os_opname-2023_02_21
+    outs:
+      - data/processed/gazetteer.parquet
+  combine_comments:
+    cmd: python -m scripts.preprocessing.combine_comments
+    deps:
+      - ${DATA_DIR}/comments-2022_04_17
+      - scripts/preprocessing/combine_comments.py
+    outs:
+      - data/processed/comments.parquet
+  train:
+    cmd: python -m src.train
+    deps:
+    - data/processed/labelled.jsonl
+    - src/train.py
+    outs:
+    - logs/seed_42_ger_test.csv
+    frozen: true
+  upload:
+    cmd: python -m src.train --upload=true
+    deps:
+      - data/processed/labelled.jsonl
+      - src/train.py
+    frozen: true
+  ner:
+    cmd: python -m src.ner
+    deps:
+      - data/processed/comments.parquet
+      - src/ner.py
+    outs:
+      - data/processed/ner.csv:
+          push: false
+    frozen: true
+  geocode:
+    cmd: python -m src.geocode
+    deps:
+      - data/processed/ner.csv
+      - data/processed/gazetteer.parquet
+      - ${DATA_DIR}/subreddits-2023_02_21.parquet
+    outs:
+      - data/processed/geocoded.csv:
+          push: false
+    frozen: true
+  analysis:
+    cmd: python -m scripts.analysis.process
+    deps:
+      - data/processed/geocoded.csv
+    outs:
+      - data/out/places_full.parquet
+      - data/out/places.parquet
+      - data/out/h3_pci.parquet
+    frozen: true
+  regressions:
+    cmd: python -m scripts.analysis.regressions
+    deps:
+      - data/out/h3_pci.parquet
+    outs:
+      - data/out/regressions/h3_lr_metrics.json
+      - data/out/regressions/h3_lr.parquet
+      - data/out/regressions/mm.parquet
+      - data/out/regressions/mm_random_effects.parquet
+      - data/out/regressions/mm_metrics.json
+  h3_poly:
+    cmd: python -m scripts.preprocessing.h3_poly
+    deps:
+      - data/out/places.parquet
+      - scripts/preprocessing/h3_poly.py
+    outs:
+      - data/out/h3_poly.parquet
