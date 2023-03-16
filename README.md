@@ -1,6 +1,6 @@
 <div align="center">
 
-# Geoparsing comments from Reddit to extract mental place connectivity within the United Kingdom
+# Mapping Cognitive Place Connectivity within the United Kingdom through Online Discussion on Reddit
 
 <a href="https://www.python.org"><img alt="Python" src="https://img.shields.io/badge/python%20-%2314354C.svg?&style=for-the-badge&logo=python&logoColor=white"/></a>
 <a href="https://pytorch.org/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch%20-%23EE4C2C.svg?&style=for-the-badge&logo=PyTorch&logoColor=white"/></a>
@@ -28,7 +28,7 @@ Jeremy Morley \[[`@jeremy_morley`](http://twitter.com/meremy_morley)\]<sup>3</su
 
 ## Abstract
 
-Place connectivity is explored between geographic locations extracted from comments on Reddit. Unlike formally structured geographic data, this corpus of unstructured text provides connections through location co-occurrences, capturing subconscious links between locations, alongside inherent biases. We first build a custom georeferencing pipeline to identify place names found in comments, disambiguating each to a set of coordinates where possible. Following this, we explore connections between locations that co-occur in user comments, building a picture of 'mental' place connectivity in the United Kingdom. Our method is not restricted in scale, identifying connections between over 10,000 unique locations like cities, towns, individual streets and points of interest like parks. We examine the distance decay of co-occurrencces, constructing a gravity model, and observing a $\beta$ coefficient of 0.42, indicating a stronger decay effect compared with past work that used co-occurrence in news articles to identify relationships between cities.
+    Cognitive place connectivity can be conceptualised as aggregate or individualised levels of perceived connectivity between geographic locations. Such geographic knowledge, used to form 'mental maps' of these relationships, can be resolved through unstructured text, providing derivable cognitive connections through location name co-occurrences, capturing cognitive links between locations, alongside inherent biases. To demonstrate the utility of our theoretical framework, we utilise a large corpus of online discussion data from the social media website Reddit: using Natural Language Processing, we first build a custom geoparsing pipeline to identify place names found in comments, disambiguating each to a set of coordinates where possible. Following this, we explore the level of connectivity between locations that co-occur in user comments, building a picture of cognitive place connectivity in the United Kingdom. Exploring these geographies nationally, connectivities were shown to be typically weaker over greater distances, however this distance decay effect is highly regional, strongest across Scotland, Wales, the South West of England and surrounding London. When comparing major cities across the UK, we observe distinct distance decay patterns, influenced primarily by proximity to cities.
 
 ## HuggingFace NER Model
 
