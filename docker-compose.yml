@@ -1,8 +1,0 @@
-services:
-  model:
-    image: cjber/reddit-connectivity
-    command: python3 -m src.train
-    runtime: nvidia
-    volumes:
-    - $PWD/data/:/reddit-connectivity/data:Z
-    - $PWD/logs/:/reddit-connectivity/logs:Z
