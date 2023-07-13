@@ -4298,6 +4298,21 @@ files = [
 traitlets = "*"
 
 [[package]]
+name = "matplotlib-scalebar"
+version = "0.8.1"
+description = "Artist for matplotlib to display a scale bar"
+category = "main"
+optional = false
+python-versions = "~=3.7"
+files = [
+    {file = "matplotlib-scalebar-0.8.1.tar.gz", hash = "sha256:14887af1093579c5e6afae51a0a1ecc3f715cdbc5c4d7ef59cdeec76ee6bb15d"},
+    {file = "matplotlib_scalebar-0.8.1-py2.py3-none-any.whl", hash = "sha256:a8a2f361d4c2d576d087df3092ed95cac2f708f8b40d5d2bb992bd190e740b3a"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+
+[[package]]
 name = "mdit-py-plugins"
 version = "0.3.3"
 description = "Collection of plugins for markdown-it-py"
@@ -9116,4 +9131,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.10"
-content-hash = "2ad9e23c2fb55848215a594d8bd8a6b6b3e96a876a4998319758a6c72b3ae047"
+content-hash = "e2ca14b6fc185d4f182a5c6e797563939478d742e1dd85360da10de21f1511aa"

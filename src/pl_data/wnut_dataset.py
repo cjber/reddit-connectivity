@@ -40,7 +40,7 @@ class WNUTDataset(Dataset):
         wnut = concatenate_datasets([wnut["train"], wnut["validation"], wnut["test"]])
         return (
             wnut.map(self.use_loc)
-            .map(self.normalise)
+            # .map(self.normalise)
             .map(self.tokenize_and_align_labels)
         )
 
@@ -123,7 +123,7 @@ class WNUTDataset(Dataset):
 
     @staticmethod
     def normalise(example: dict[str, list[str]]) -> dict[str, list[str]]:
-        example["tokens"] = [preprocess(word) for word in example["tokens"]]
+        example["tokens"] = preprocess(example["tokens"])
         return example
 
     @staticmethod

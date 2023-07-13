@@ -114,15 +114,15 @@ stages:
   geocode:
     cmd: python -m src.geocode
     deps:
-    - path: data/processed/gazetteer.parquet
-      md5: 0755edd31f34de9237c2344a30267f5b
-      size: 46809800
-    - path: data/processed/ner.csv
-      md5: cf79b5dc21b49ff4c47e6566d7ca63e5
-      size: 2775594789
-    - path: data/raw/subreddits.parquet
+    - path: /home/cjber/data/subreddits-2023_02_21.parquet
       md5: 8c4753f52d236918b849c11d78175795
       size: 15896
+    - path: data/processed/gazetteer.parquet
+      md5: 4c14a5f585c3105258438a6244c417a0
+      size: 49278752
+    - path: data/processed/ner.csv
+      md5: d41d8cd98f00b204e9800998ecf8427e
+      size: 0
     outs:
     - path: data/processed/geocoded.csv
       md5: c31608bd04299419f49859cdeebcd1d5

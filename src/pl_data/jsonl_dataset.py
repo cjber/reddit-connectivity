@@ -29,7 +29,7 @@ class JSONLDataset(Dataset):
 
         self.data = [
             {
-                "sentence": self.normalise(sent.text),
+                "sentence": sent.text,
                 "meta": context | {"sentence": sent.text},
             }
             for doc, context in tqdm(nlp.pipe(data, as_tuples=True, n_process=1))
@@ -56,4 +56,4 @@ class JSONLDataset(Dataset):
 
     @staticmethod
     def normalise(example: str) -> str:
-        return " ".join(preprocess(word) for word in example.split())
+        return preprocess(example)

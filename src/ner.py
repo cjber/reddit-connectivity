@@ -87,8 +87,7 @@ def main():
 
         for item in out:
             new_row = pd.concat([row, pd.Series(item)], ignore_index=True)
-            out_df = pd.concat(
-                [out_df, new_row.to_frame().T], ignore_index=True)
+            out_df = pd.concat([out_df, new_row.to_frame().T], ignore_index=True)
 
         if (idx % 10_000 == 0) or (idx == len(comments) - 1):
             with open(IDX_FILE, "a") as idx_file:

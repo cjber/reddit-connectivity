@@ -11,14 +11,6 @@ from src.common.utils import Const, Label
 from src.pl_metric.seqeval_f1 import Seqeval
 
 
-def unzip_dict(d):
-    keys = [k for k, _ in d.items()]
-    values = [d[k] for k in keys]
-
-    for value in zip(*values):
-        yield dict(zip(keys, value))
-
-
 class GERModel(pl.LightningModule):
     def __init__(self) -> None:
         super().__init__()

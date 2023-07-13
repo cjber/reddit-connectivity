@@ -47,13 +47,16 @@ class TestDataset(Dataset):
             doc = nlp(item.pop("text"))
             tags = offsets_to_biluo_tags(doc=doc, entities=item["tags"])
 
+            if "-" in tags:
+                continue
+
             tags = ["I-location" if tag == "L-location" else tag for tag in tags]
             tags = ["B-location" if tag == "U-location" else tag for tag in tags]
 
             tags = [Label.labels[tag] for tag in tags]
             tokens = [str(token) for token in doc]
             example = {"tokens": tokens, "ner_tags": tags}
-            example = self.normalise(example)
+            # example = self.normalise(example)
             example = self.tokenize_and_align_labels(example)
             doccano.append(example)
         return doccano
@@ -96,5 +99,5 @@ class TestDataset(Dataset):
 
     @staticmethod
     def normalise(example: dict[str, list[str]]) -> dict[str, list[str]]:
-        example["tokens"] = [preprocess(word) for word in example["tokens"]]
+        example["tokens"] = preprocess(example["tokens"])
         return example

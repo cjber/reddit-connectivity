@@ -8,6 +8,7 @@ stages:
     - ${DATA_DIR}/os_opname-2023_02_21
     outs:
       - data/processed/gazetteer.parquet
+    frozen: true
   combine_comments:
     cmd: python -m scripts.preprocessing.combine_comments
     deps:
@@ -15,14 +16,15 @@ stages:
       - scripts/preprocessing/combine_comments.py
     outs:
       - data/processed/comments.parquet
+    frozen: true
   train:
     cmd: python -m src.train
     deps:
-    - data/processed/labelled.jsonl
+    - data/processed/label/doccano_annotated.jsonl
     - src/train.py
     outs:
     - logs/seed_42_ger_test.csv
-    frozen: true
+    frozen: false
   upload:
     cmd: python -m src.train --upload=true
     deps:
@@ -56,7 +58,7 @@ stages:
       - data/out/places_full.parquet
       - data/out/places.parquet
       - data/out/h3_pci.parquet
-    frozen: true
+    frozen: false
   regressions:
     cmd: python -m scripts.analysis.regressions
     deps:

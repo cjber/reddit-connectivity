@@ -81,13 +81,13 @@ def run(
     )
 
     if args.fast_dev_run:
-        trainer_kwargs = {"gpus": None, "auto_select_gpus": False}
+        trainer_kwargs = {"accelerator": "cpu"}
     else:
-        trainer_kwargs = {"gpus": -1, "auto_select_gpus": True, "precision": 16}
+        trainer_kwargs = {"accelerator": "cuda", "precision": 16}
 
-    trainer: pl.Trainer = pl.Trainer.from_argparse_args(
-        args,
+    trainer: pl.Trainer = pl.Trainer(
         **trainer_kwargs,
+        fast_dev_run=args.fast_dev_run,
         deterministic=True,
         default_root_dir="ckpts",
         logger=[csv_logger, mlflow_logger],
@@ -96,7 +96,6 @@ def run(
         max_epochs=5,
     )
 
-    trainer.tune(model=model, datamodule=datamodule)
     trainer.fit(model=model, datamodule=datamodule)
 
     if args.upload:
@@ -104,12 +103,12 @@ def run(
         model.tokenizer.push_to_hub("cjber/reddit-ner-place_names")
     else:
         test = trainer.test(model=model, ckpt_path="best", datamodule=testmodule)
-        pd.DataFrame(test).to_csv(f"logs/seed_{seed}_{name}_test.csv")
+        # pd.DataFrame(test).to_csv(f"logs/seed_{seed}_{name}_test.csv")
     csv_logger.save()
 
 
 if __name__ == "__main__":
-    labelled = Paths.PROCESSED / "labelled.jsonl"
+    labelled = Paths.PROCESSED / "label" / "doccano_annotated.jsonl"
     dataset = WNUTDataset(doccano=labelled) if args.upload else WNUTDataset()
 
     run(
