@@ -34,6 +34,17 @@ This paper explores cognitive place associations; conceptualised as a place-base
 
 The NER model used as part of this work is available on the [HuggingFace model hub](https://huggingface.co/cjber/reddit-ner-place_names). Instructions for using this model are included on the model card. For more information relating to model training please see the model [GitHub repository](https://github.com/cjber/reddit-model).
 
+## Data
+
+The data produced through this paper is made available for download through the [DagsHub respository](https://dagshub.com/cjber/reddit-connectivity). The following links provide direct downloads to datasets that may be of interest:
+
+* [UK Reddit comments with identified place names](https://dagshub.com/cjber/reddit-connectivity/raw/52222d9ec58865abde56ccc238cf70204ce3e35a/data/out/places_full.parquet)
+* [UK Reddit comments with identified place names (excluding non geocoded locations)](https://dagshub.com/cjber/reddit-connectivity/raw/52222d9ec58865abde56ccc238cf70204ce3e35a/data/out/places.parquet)
+* [Place associations aggregated to H3](https://dagshub.com/cjber/reddit-connectivity/raw/52222d9ec58865abde56ccc238cf70204ce3e35a/data/out/pci_h3.parquet) 
+* [Place associations aggregated to UK LAD](https://dagshub.com/cjber/reddit-connectivity/raw/52222d9ec58865abde56ccc238cf70204ce3e35a/data/out/pci_lad.parquet)
+* [Place associations with no aggregation](https://dagshub.com/cjber/reddit-connectivity/raw/52222d9ec58865abde56ccc238cf70204ce3e35a/data/out/pci.parquet)
+
+
 ### Project layout
 
 ```bash
