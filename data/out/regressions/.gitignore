@@ -3,3 +3,5 @@
 /mm.parquet
 /mm_random_effects.parquet
 /mm_metrics.json
+/lr_metrics.json
+/lr.parquet

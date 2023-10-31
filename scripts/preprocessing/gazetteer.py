@@ -1,14 +1,14 @@
 from pathlib import Path
 
 import geopandas as gpd
+import h3pandas  # noqa
 import pandas as pd
 import polars as pl
 
-from scripts.preprocessing.aggregate import aggregate_to_h3, aggregate_to_lad
 from src.common.utils import Paths
 
 
-def process_osnames(path, header_path):
+def process_osnames(path: Path, header_path: Path) -> pl.DataFrame:
     os_header = pl.read_csv(header_path)
     mappings = {
         "landcover": "natural",
@@ -59,7 +59,7 @@ def process_osnames(path, header_path):
     )
 
 
-def process_gbpn(path: Path) -> pd.DataFrame:
+def process_gbpn(path: Path) -> pl.DataFrame:
     df = pd.read_csv(
         path,
         usecols=["PlaceName", "Lat", "Lng", "Type"],
@@ -120,29 +120,75 @@ def process_gbpn(path: Path) -> pd.DataFrame:
     df["easting"] = df.geometry.x
     df["northing"] = df.geometry.y
 
-    return df[["name", "type", "easting", "northing"]]
+    return pl.from_pandas(df[["name", "type", "easting", "northing"]])
 
 
-if __name__ == "__main__":
-    gbpn = process_gbpn(Paths.RAW_DATA / "gbpn-2021_14_06.csv")
-    lad = gpd.read_parquet(Paths.RAW_DATA / "lad-2023_02_21.parquet")
-    osnames = process_osnames(
-        path=Paths.RAW_DATA / "os_opname-2023_02_21",
-        header_path=Paths.RAW_DATA / "os_opname-2023_02_21/0_header.csv",
-    )
-
-    gazetteer = pl.concat([osnames, pl.from_pandas(gbpn)], how="vertical").to_pandas()
+def join_gazetteer(
+    gbpn: pl.DataFrame,
+    osnames: pl.DataFrame,
+    lad: gpd.GeoDataFrame,
+    lsoa: gpd.GeoDataFrame,
+) -> pl.DataFrame:
+    gazetteer = pl.concat([osnames, gbpn], how="vertical").to_pandas()
     gazetteer = gpd.GeoDataFrame(
         gazetteer,
         geometry=gpd.points_from_xy(gazetteer["easting"], gazetteer["northing"]),
         crs=27700,
     )
+    glad = pl.from_pandas(
+        gpd.sjoin(lad, gazetteer, how="right")
+        .assign(lad_easting=lambda x: x.geometry.x, lad_northing=lambda x: x.geometry.y)
+        .drop(["geometry", "index_left"], axis=1)
+    )[["name", "easting", "northing", "LAD21NM", "LAD21CD"]]
+    glsoa = pl.from_pandas(
+        gpd.sjoin(lsoa, gazetteer, how="right")
+        .assign(lad_easting=lambda x: x.geometry.x, lad_northing=lambda x: x.geometry.y)
+        .drop(["geometry", "index_left"], axis=1)
+    )[["name", "easting", "northing", "LSOA21NM", "LSOA21CD"]]
     gazetteer = pl.from_pandas(
-        gazetteer.pipe(aggregate_to_lad, lad).pipe(aggregate_to_h3, 5)
-    ).with_columns(
-        (pl.col("name") + pl.col("easting").cast(str) + pl.col("northing").cast(str))
-        .cast(pl.Categorical)
-        .cast(int)
-        .alias("place_id")
+        gazetteer.to_crs(4326)
+        .assign(lng=lambda x: x.geometry.x, lat=lambda x: x.geometry.y)
+        .h3.geo_to_h3(resolution=5)
+        .h3.h3_to_geo()
+        .to_crs(27700)
+        .assign(
+            h3_easting=lambda x: x.geometry.x.astype(int),
+            h3_northing=lambda x: x.geometry.y.astype(int),
+        )
+        .reset_index()
+        .rename(columns={"h3_04": "h3_05"})
+        .drop("geometry", axis=1)
     )
+    gazetteer = (
+        gazetteer.join(glad, on=["name", "easting", "northing"])
+        .join(glsoa, on=["name", "easting", "northing"])
+        .with_columns(
+            (
+                pl.col("name")
+                + pl.col("easting").cast(str)
+                + pl.col("northing").cast(str)
+            )
+            .cast(pl.Categorical)
+            .cast(pl.Int32)
+            .alias("place_id")
+        )
+    )
+    return gazetteer
+
+
+if __name__ == "__main__":
+    gbpn = process_gbpn(Paths.RAW_DATA / "gbpn-2021_14_06.csv")
+    osnames = process_osnames(
+        path=Paths.RAW_DATA / "os_opname-2023_02_21",
+        header_path=Paths.RAW_DATA / "os_opname-2023_02_21/0_header.csv",
+    )
+    lad = gpd.read_file(Paths.RAW_DATA / "lad-2021.gpkg")[
+        ["LAD21CD", "LAD21NM", "geometry"]
+    ]
+    lsoa = gpd.read_file(
+        Paths.RAW_DATA
+        / "LSOA_Dec_2021_Boundaries_Full_Clipped_EW_BFC_2022_-6437031168783062454.gpkg"
+    )[["LSOA21CD", "LSOA21NM", "geometry"]]
+
+    gazetteer = join_gazetteer(gbpn, osnames, lad, lsoa)
     gazetteer.write_parquet(Paths.PROCESSED / "gazetteer.parquet")

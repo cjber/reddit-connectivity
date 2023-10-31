@@ -6,6 +6,7 @@ from src.common.utils import Paths
 if __name__ == "__main__":
     (
         pl.read_parquet(Paths.OUT / "places.parquet")
+        .filter(pl.col("h3_05") != None)
         .select("h3_05")
         .unique()
         .to_pandas()

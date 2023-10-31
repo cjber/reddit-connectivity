@@ -2,3 +2,6 @@
 /places.parquet
 /h3_pci.parquet
 /h3_poly.parquet
+/pci_h3.parquet
+/pci.parquet
+/pci_lad.parquet

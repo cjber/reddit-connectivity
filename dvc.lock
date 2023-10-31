@@ -1,25 +1,5 @@
 schema: '2.0'
 stages:
-  gazetteer:
-    cmd: python -m scripts.preprocessing.gazetteer
-    deps:
-    - path: /home/cjber/data/gbpn-2021_14_06.csv
-      md5: 2f5676cb0e637020f5112d310725960c
-      size: 36417462
-    - path: /home/cjber/data/lad-2023_02_21.parquet
-      md5: a0acc4486f91556333d6bd970c4da65a
-      size: 908970
-    - path: /home/cjber/data/os_opname-2023_02_21
-      md5: c6673265a1f9dfd5da0ccb7d9c7f4cdc.dir
-      size: 1777205703
-      nfiles: 820
-    - path: scripts/preprocessing/gazetteer.py
-      md5: bba4f0cc173460734dbb4efa29e18a7e
-      size: 4907
-    outs:
-    - path: data/processed/gazetteer.parquet
-      md5: 4c14a5f585c3105258438a6244c417a0
-      size: 49278752
   combine_comments:
     cmd: python -m scripts.preprocessing.combine_comments
     deps:
@@ -28,111 +8,161 @@ stages:
       size: 2650450823
       nfiles: 258
     - path: scripts/preprocessing/combine_comments.py
-      md5: d6fec10dea98951324a4b902b76bd16e
-      size: 522
+      md5: 4283bc1f61bbad0cb650f86a2e9a4043
+      size: 586
     outs:
     - path: data/processed/comments.parquet
-      md5: 4e731b47e72595cc17198777dae84c67
-      size: 678861554
-  ner:
-    cmd: python -m src.ner
+      md5: e606bf0480434bb9de45a83ed38a43e8
+      size: 676618532
+  gazetteer:
+    cmd: python -m scripts.preprocessing.gazetteer
     deps:
-    - path: data/processed/comments.parquet
-      md5: 025675b0c2b3208fcbe052b595272d30
-      size: 653275852
-    - path: src/ner.py
-      md5: 9a986317eec5646ab137858287b99477
-      size: 2915
+    - path: /home/cjber/data/gbpn-2021_14_06.csv
+      md5: 2f5676cb0e637020f5112d310725960c
+      size: 36417462
+    - path: /home/cjber/data/lad-2021.gpkg
+      md5: 83adcc3a7f496b927fd0238b3954f8c4
+      size: 8638464
+    - path: /home/cjber/data/os_opname-2023_02_21
+      md5: c6673265a1f9dfd5da0ccb7d9c7f4cdc.dir
+      size: 1777205703
+      nfiles: 820
+    - path: scripts/preprocessing/gazetteer.py
+      md5: 24ec621eec44702095044ad5800cf002
+      size: 6481
     outs:
-    - path: data/processed/ner.csv
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-  analysis:
-    cmd: python -m scripts.analysis.process
-    deps:
-    - path: data/processed/geocoded.csv
-      md5: c31608bd04299419f49859cdeebcd1d5
-      size: 3020093130
-    outs:
-    - path: data/out/h3_pci.parquet
-      md5: c62792022b64adc9858a527722704ca2
-      size: 30756244
-    - path: data/out/places.parquet
-      md5: bcb63ac9ff9597b327430e2b0188333e
-      size: 363137511
-    - path: data/out/places_full.parquet
-      md5: f495c36d310ffb50914c43fce98160b8
-      size: 393266925
-  regressions:
-    cmd: python -m scripts.analysis.regressions
-    deps:
-    - path: data/out/h3_pci.parquet
-      md5: 2471de5adf8fe17eb5681279f76529e3
-      size: 18232388
-    outs:
-    - path: data/out/regressions/h3_lr.parquet
-      md5: 45e2f91fefdf7e35e91787fb4d9df2b8
-      size: 38143532
-    - path: data/out/regressions/h3_lr_metrics.json
-      md5: cf7fa3894d264fbc104b0242831d5ab7
-      size: 114
-    - path: data/out/regressions/mm.parquet
-      md5: 05f0eea2c36270c575638cd8b3069e0f
-      size: 38290760
-    - path: data/out/regressions/mm_metrics.json
-      md5: c6006510bbecaa1c6ebd1bff869eb0e5
-      size: 59
-    - path: data/out/regressions/mm_random_effects.parquet
-      md5: f73e93cc416125d6352c0c0e00ce2460
-      size: 46768
-  h3_poly:
-    cmd: python -m scripts.preprocessing.h3_poly
-    deps:
-    - path: data/out/places.parquet
-      md5: bcb63ac9ff9597b327430e2b0188333e
-      size: 363137511
-    - path: scripts/preprocessing/h3_poly.py
-      md5: b2a61e826e1f320d67e2b573525a8c84
-      size: 342
-    outs:
-    - path: data/out/h3_poly.parquet
-      md5: d62ef0dd6973690dfbe33b80f1412e38
-      size: 119328
+    - path: data/processed/gazetteer.parquet
+      md5: b4887475d4b4823e3cfc80688e87cb3f
+      size: 59478400
   train:
     cmd: python -m src.train
     deps:
-    - path: data/processed/labelled.jsonl
-      md5: 428b1152757d95f732db8e9e7066b90a
-      size: 171102
+    - path: data/processed/label/doccano_annotated.jsonl
+      md5: 4f343a7167f51504746c859fe2cd4a11
+      size: 237563
     - path: src/train.py
-      md5: 411dc6af669aabcd8a4bfcf845b7b9c8
-      size: 3498
+      md5: 72debeba106207c76b9581cf1c49c592
+      size: 3606
     outs:
     - path: logs/seed_42_ger_test.csv
-      md5: 6634c04a2d38cc1cc91f3358282ff221
-      size: 124
+      md5: 01e7194c2a4ec4f2c8bc33401831053d
+      size: 125
+  ner:
+    cmd: python -m scripts.preprocessing.ner
+    deps:
+    - path: data/processed/comments.parquet
+      md5: e606bf0480434bb9de45a83ed38a43e8
+      size: 676618532
+    - path: scripts/preprocessing/ner.py
+      md5: a2ec77fd58ff995cfc983a4b9ecd428b
+      size: 2842
+    outs:
+    - path: data/processed/ner.csv
+      md5: 4c37d7b9443eb89577429edfd5551eec
+      size: 90
   geocode:
-    cmd: python -m src.geocode
+    cmd: python -m scripts.preprocessing.geocode
     deps:
     - path: /home/cjber/data/subreddits-2023_02_21.parquet
       md5: 8c4753f52d236918b849c11d78175795
       size: 15896
     - path: data/processed/gazetteer.parquet
-      md5: 4c14a5f585c3105258438a6244c417a0
-      size: 49278752
+      md5: b4887475d4b4823e3cfc80688e87cb3f
+      size: 59478400
     - path: data/processed/ner.csv
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
+      md5: 4c37d7b9443eb89577429edfd5551eec
+      size: 90
+    - path: scripts/preprocessing/geocode.py
+      md5: e0c7eca06f86d86a6b0ce47990f6cbef
+      size: 4406
     outs:
     - path: data/processed/geocoded.csv
       md5: c31608bd04299419f49859cdeebcd1d5
       size: 3020093130
+  analysis:
+    cmd: python -m scripts.analysis.process
+    deps:
+    - path: data/processed/gazetteer.parquet
+      md5: b4887475d4b4823e3cfc80688e87cb3f
+      size: 59478400
+    - path: data/processed/geocoded.csv
+      md5: c31608bd04299419f49859cdeebcd1d5
+      size: 3020093130
+    outs:
+    - path: data/out/pci_h3.parquet
+      md5: 5468d4e8f204a9c5d62b72a746c3e8c6
+      size: 25399080
+    - path: data/out/places.parquet
+      md5: 5e55e8115fb213e793fb016bb69ca60e
+      size: 275407843
+    - path: data/out/places_full.parquet
+      md5: e01304767c868c7059ddfa5ab4fe00e7
+      size: 448903974
+  regressions:
+    cmd: python -m scripts.analysis.regressions
+    deps:
+    - path: data/out/pci_h3.parquet
+      md5: 5468d4e8f204a9c5d62b72a746c3e8c6
+      size: 25399080
+    - path: scripts/analysis/regressions.py
+      md5: adb592f05392a78c7a32e31b3ea282df
+      size: 3520
+    outs:
+    - path: data/out/regressions/lr.parquet
+      md5: 81b40c9a18bb8d3db4ac63eb6056e685
+      size: 58112375
+    - path: data/out/regressions/lr_metrics.json
+      md5: 08dd1626ff5fbc351fd22749e355aa67
+      size: 115
+    - path: data/out/regressions/mm.parquet
+      md5: d0b7a1bae0fbd3676ca26b7266123336
+      size: 58174383
+    - path: data/out/regressions/mm_metrics.json
+      md5: ea0db8a94e4f4b2bb8148cf22e8c7124
+      size: 59
+    - path: data/out/regressions/mm_random_effects.parquet
+      md5: 81ed9d4e7a75b635850c295740f8b976
+      size: 59189
+  h3_poly:
+    cmd: python -m scripts.preprocessing.h3_poly
+    deps:
+    - path: data/out/places.parquet
+      md5: 5e55e8115fb213e793fb016bb69ca60e
+      size: 275407843
+    - path: scripts/preprocessing/h3_poly.py
+      md5: 385ce8c373fbd79dde376d5b5154ba27
+      size: 383
   upload:
     cmd: python -m src.train --upload=true
     deps:
-    - path: data/processed/labelled.jsonl
-      md5: 428b1152757d95f732db8e9e7066b90a
-      size: 171102
+    - path: data/processed/label/doccano_annotated.jsonl
+      md5: 4f343a7167f51504746c859fe2cd4a11
+      size: 237563
     - path: src/train.py
-      md5: 411dc6af669aabcd8a4bfcf845b7b9c8
-      size: 3498
+      md5: 72debeba106207c76b9581cf1c49c592
+      size: 3606
+  association:
+    cmd: python -m scripts.analysis.process
+    deps:
+    - path: data/processed/gazetteer.parquet
+      md5: b4887475d4b4823e3cfc80688e87cb3f
+      size: 59478400
+    - path: data/processed/geocoded.csv
+      md5: c31608bd04299419f49859cdeebcd1d5
+      size: 3020093130
+    - path: scripts/analysis/pci.py
+      md5: 3b2c028b18cd5585337736e3b2876b12
+      size: 1682
+    - path: scripts/analysis/process.py
+      md5: d154d24fb26e1a6c4ab8f9a8af0d727f
+      size: 1788
+    outs:
+    - path: data/out/pci_h3.parquet
+      md5: 5468d4e8f204a9c5d62b72a746c3e8c6
+      size: 25399080
+    - path: data/out/places.parquet
+      md5: 5e55e8115fb213e793fb016bb69ca60e
+      size: 275407843
+    - path: data/out/places_full.parquet
+      md5: e01304767c868c7059ddfa5ab4fe00e7
+      size: 448903974

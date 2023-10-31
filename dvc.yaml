@@ -3,46 +3,37 @@ stages:
     cmd: python -m scripts.preprocessing.gazetteer
     deps:
     - scripts/preprocessing/gazetteer.py
-    - ${DATA_DIR}/lad-2023_02_21.parquet
+
+    - ${DATA_DIR}/lad-2021.gpkg
     - ${DATA_DIR}/gbpn-2021_14_06.csv
     - ${DATA_DIR}/os_opname-2023_02_21
     outs:
       - data/processed/gazetteer.parquet
-    frozen: true
+    frozen: false
   combine_comments:
     cmd: python -m scripts.preprocessing.combine_comments
     deps:
-      - ${DATA_DIR}/comments-2022_04_17
       - scripts/preprocessing/combine_comments.py
+
+      - ${DATA_DIR}/comments-2022_04_17
     outs:
       - data/processed/comments.parquet
-    frozen: true
-  train:
-    cmd: python -m src.train
-    deps:
-    - data/processed/label/doccano_annotated.jsonl
-    - src/train.py
-    outs:
-    - logs/seed_42_ger_test.csv
     frozen: false
-  upload:
-    cmd: python -m src.train --upload=true
-    deps:
-      - data/processed/labelled.jsonl
-      - src/train.py
-    frozen: true
   ner:
-    cmd: python -m src.ner
+    cmd: python -m scripts.preprocessing.ner
     deps:
+      - scripts/preprocessing/ner.py
+
       - data/processed/comments.parquet
-      - src/ner.py
     outs:
       - data/processed/ner.csv:
           push: false
     frozen: true
   geocode:
-    cmd: python -m src.geocode
+    cmd: python -m scripts.preprocessing.geocode
     deps:
+      - scripts/preprocessing/geocode.py
+
       - data/processed/ner.csv
       - data/processed/gazetteer.parquet
       - ${DATA_DIR}/subreddits-2023_02_21.parquet
@@ -50,29 +41,35 @@ stages:
       - data/processed/geocoded.csv:
           push: false
     frozen: true
-  analysis:
+  association:
     cmd: python -m scripts.analysis.process
     deps:
+      - scripts/analysis/process.py
+      - scripts/analysis/pci.py
+
       - data/processed/geocoded.csv
+      - data/processed/gazetteer.parquet
     outs:
       - data/out/places_full.parquet
       - data/out/places.parquet
-      - data/out/h3_pci.parquet
+      - data/out/pci_h3.parquet
     frozen: false
   regressions:
     cmd: python -m scripts.analysis.regressions
     deps:
-      - data/out/h3_pci.parquet
+      - scripts/analysis/regressions.py
+
+      - data/out/pci_h3.parquet
     outs:
-      - data/out/regressions/h3_lr_metrics.json
-      - data/out/regressions/h3_lr.parquet
+      - data/out/regressions/lr_metrics.json
+      - data/out/regressions/lr.parquet
       - data/out/regressions/mm.parquet
       - data/out/regressions/mm_random_effects.parquet
       - data/out/regressions/mm_metrics.json
+    frozen: false
   h3_poly:
     cmd: python -m scripts.preprocessing.h3_poly
     deps:
-      - data/out/places.parquet
       - scripts/preprocessing/h3_poly.py
-    outs:
-      - data/out/h3_poly.parquet
+
+      - data/out/places.parquet
